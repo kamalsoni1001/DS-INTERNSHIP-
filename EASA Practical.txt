@@ -1,0 +1,996 @@
+#Practical 3
+
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import plot_tree
+from sklearn.tree import export_text
+from sklearn.metrics import accuracy_score
+
+# Load Dataset
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+# Split Dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+# Train Model
+model = DecisionTreeClassifier(random_state=42)
+model.fit(X_train, y_train)
+
+# Prediction
+y_pred = model.predict(X_test)
+
+# Accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print("Accuracy:", round(accuracy * 100, 2), "%")
+
+# Decision Rules
+print("\nDecision Rules:")
+print(export_text(model, feature_names=list(iris.feature_names)))
+
+# Visualize Tree
+plt.figure(figsize=(15,8))
+plot_tree(
+    model,
+    feature_names=iris.feature_names,
+    class_names=iris.target_names,
+    filled=True,
+    rounded=True
+)
+
+plt.title("Decision Tree")
+plt.show()
+
+# ==========================================================
+# Practical 8
+# Title : Generate SHAP Summary Plots for Model Interpretation
+# ==========================================================
+
+# Install SHAP (Run only once in Google Colab)
+!pip -q install shap
+
+# Import required libraries
+
+import shap
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+
+# ----------------------------------------------------------
+# Load Breast Cancer Dataset
+# ----------------------------------------------------------
+
+data = load_breast_cancer()
+
+# Store input features
+X = data.data
+
+# Store target labels
+y = data.target
+
+print("Dataset Loaded Successfully")
+
+# ----------------------------------------------------------
+# Split Dataset
+# ----------------------------------------------------------
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+
+# ----------------------------------------------------------
+# Train Random Forest Model
+# ----------------------------------------------------------
+
+model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
+
+model.fit(X_train, y_train)
+
+print("\nRandom Forest Model Trained Successfully")
+
+# ----------------------------------------------------------
+# Create SHAP Explainer
+# ----------------------------------------------------------
+
+explainer = shap.TreeExplainer(model)
+
+print("SHAP Explainer Created Successfully")
+
+# ----------------------------------------------------------
+# Generate SHAP Values
+# ----------------------------------------------------------
+
+shap_values = explainer.shap_values(X_test)
+
+print("SHAP Values Generated Successfully")
+
+# ----------------------------------------------------------
+# Display SHAP Summary Plot
+# ----------------------------------------------------------
+
+print("\nGenerating SHAP Summary Plot...")
+
+shap.summary_plot(
+    shap_values,
+    X_test,
+    feature_names=data.feature_names
+)
+
+print("\nSHAP Summary Plot Generated Successfully")
+
+# ==========================================================
+# Practical 9
+# Title : Perform Local Prediction Explanation using
+#         SHAP Force Plots
+# ==========================================================
+
+# Install SHAP (Run only once in Google Colab)
+
+!pip -q install shap
+
+# Import required libraries
+
+import shap
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+
+# ----------------------------------------------------------
+# Load Breast Cancer Dataset
+# ----------------------------------------------------------
+
+data = load_breast_cancer()
+
+# Store input features
+X = data.data
+
+# Store target labels
+y = data.target
+
+print("Dataset Loaded Successfully")
+
+# ----------------------------------------------------------
+# Split Dataset
+# ----------------------------------------------------------
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+
+# ----------------------------------------------------------
+# Train Random Forest Model
+# ----------------------------------------------------------
+
+model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
+
+model.fit(X_train, y_train)
+
+print("\nRandom Forest Model Trained Successfully")
+
+# ----------------------------------------------------------
+# Create SHAP Explainer
+# ----------------------------------------------------------
+
+explainer = shap.TreeExplainer(model)
+
+print("SHAP Explainer Created Successfully")
+
+# ----------------------------------------------------------
+# Initialize SHAP JavaScript
+# ----------------------------------------------------------
+
+shap.initjs()
+
+print("\nGenerating SHAP Force Plot...")
+
+# ----------------------------------------------------------
+# Generate SHAP Values
+# ----------------------------------------------------------
+
+shap_values = explainer(X_test)
+
+# ----------------------------------------------------------
+# Explain First Test Sample
+# ----------------------------------------------------------
+
+shap.force_plot(
+    explainer.expected_value[1],      # Base value for class 1
+    shap_values.values[0, :, 1],      # SHAP values for first test sample
+    X_test[0],                        # Feature values
+    feature_names=data.feature_names,
+    matplotlib=True
+)
+
+print("\nLocal Prediction Explanation Completed Successfully")
+
+# ==========================================================
+# Practical 16
+# Title : Visualize Global Explanations using InterpretML Dashboard
+# ==========================================================
+
+# Install InterpretML (Google Colab)
+
+!pip -q install interpret
+
+# Import libraries
+
+import pandas as pd
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+from interpret.glassbox import ExplainableBoostingClassifier
+from interpret import show
+
+# ----------------------------------------------------------
+# Load Dataset
+# ----------------------------------------------------------
+
+data = load_breast_cancer()
+
+X = pd.DataFrame(
+    data.data,
+    columns=data.feature_names
+)
+
+y = data.target
+
+print("Dataset Loaded Successfully")
+
+# ----------------------------------------------------------
+# Split Dataset
+# ----------------------------------------------------------
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+
+print("Dataset Split Successfully")
+
+# ----------------------------------------------------------
+# Train EBM Model
+# ----------------------------------------------------------
+
+model = ExplainableBoostingClassifier(
+    random_state=42
+)
+
+model.fit(X_train, y_train)
+
+print("EBM Model Trained Successfully")
+
+# ----------------------------------------------------------
+# Accuracy
+# ----------------------------------------------------------
+
+y_pred = model.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+
+print("Model Accuracy :", round(accuracy*100,2), "%")
+
+# ----------------------------------------------------------
+# Global Explanation
+# ----------------------------------------------------------
+
+global_exp = model.explain_global()
+
+print("\nGenerating InterpretML Dashboard...")
+
+# ----------------------------------------------------------
+# Interactive Dashboard
+# ----------------------------------------------------------
+
+show(global_exp)
+
+# ----------------------------------------------------------
+# Print Feature Importance
+# ----------------------------------------------------------
+
+dashboard = global_exp.data()
+
+print("\nTop Important Features\n")
+
+for feature, score in zip(
+        dashboard["names"],
+        dashboard["scores"]):
+    print(feature, ":", round(score,4))
+
+print("\nPractical Completed Successfully")
+
+# ==========================================================
+# Practical 17
+# Title : Evaluate Fairness Metrics on AI Models
+# ==========================================================
+
+# Install Fairlearn (Google Colab)
+
+!pip -q install fairlearn
+
+# Import libraries
+
+import pandas as pd
+import numpy as np
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+from fairlearn.metrics import (
+    MetricFrame,
+    selection_rate,
+    demographic_parity_difference,
+    equalized_odds_difference
+)
+
+# ----------------------------------------------------------
+# Load Dataset
+# ----------------------------------------------------------
+
+data = load_breast_cancer()
+
+X = pd.DataFrame(
+    data.data,
+    columns=data.feature_names
+)
+
+y = data.target
+
+print("Dataset Loaded Successfully")
+
+# ----------------------------------------------------------
+# Create Sensitive Feature
+# ----------------------------------------------------------
+
+sensitive = np.where(
+    X["mean radius"] > X["mean radius"].median(),
+    "Group A",
+    "Group B"
+)
+
+print("Sensitive Groups Created")
+
+# ----------------------------------------------------------
+# Split Dataset
+# ----------------------------------------------------------
+
+X_train, X_test, y_train, y_test, s_train, s_test = train_test_split(
+    X,
+    y,
+    sensitive,
+    test_size=0.20,
+    random_state=42
+)
+
+# ----------------------------------------------------------
+# Train Model
+# ----------------------------------------------------------
+
+model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
+
+model.fit(X_train, y_train)
+
+print("Random Forest Model Trained Successfully")
+
+# ----------------------------------------------------------
+# Prediction
+# ----------------------------------------------------------
+
+y_pred = model.predict(X_test)
+
+accuracy = accuracy_score(
+    y_test,
+    y_pred
+)
+
+print("Accuracy :", round(accuracy*100,2), "%")
+
+# ----------------------------------------------------------
+# Fairness Evaluation
+# ----------------------------------------------------------
+
+metric = MetricFrame(
+    metrics=selection_rate,
+    y_true=y_test,
+    y_pred=y_pred,
+    sensitive_features=s_test
+)
+
+print("\nSelection Rate by Group\n")
+
+print(metric.by_group)
+
+# ----------------------------------------------------------
+# Fairness Metrics
+# ----------------------------------------------------------
+
+dp = demographic_parity_difference(
+    y_true=y_test,
+    y_pred=y_pred,
+    sensitive_features=s_test
+)
+
+eo = equalized_odds_difference(
+    y_true=y_test,
+    y_pred=y_pred,
+    sensitive_features=s_test
+)
+
+print("\nDemographic Parity Difference :", round(dp,3))
+print("Equalized Odds Difference :", round(eo,3))
+
+print("\nPractical Completed Successfully")
+
+# ==========================================================
+# Practical 24
+# Title : Visualize Activation Maps in CNN Models
+# ==========================================================
+
+# ----------------------------------------------------------
+# Step 1 : Install TensorFlow
+# ----------------------------------------------------------
+
+!pip -q install tensorflow
+
+# ----------------------------------------------------------
+# Step 2 : Import Libraries
+# ----------------------------------------------------------
+
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+
+from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+from tensorflow.keras.preprocessing import image
+
+# ----------------------------------------------------------
+# Step 3 : Load Pre-trained Model
+# ----------------------------------------------------------
+
+print("Loading MobileNetV2...")
+
+model = MobileNetV2(weights="imagenet")
+
+print("Model Loaded Successfully")
+
+# ----------------------------------------------------------
+# Step 4 : Download Sample Image
+# ----------------------------------------------------------
+
+!wget -q -O cat.jpg https://storage.googleapis.com/download.tensorflow.org/example_images/320px-Felis_catus-cat_on_snow.jpg
+
+print("Sample Image Downloaded")
+
+# ----------------------------------------------------------
+# Step 5 : Load Image
+# ----------------------------------------------------------
+
+img = image.load_img(
+    "cat.jpg",
+    target_size=(224,224)
+)
+
+img_array = image.img_to_array(img)
+
+img_array = np.expand_dims(
+    img_array,
+    axis=0
+)
+
+img_array = preprocess_input(img_array)
+
+print("Image Loaded Successfully")
+
+# ----------------------------------------------------------
+# Step 6 : Collect Convolution Layers
+# ----------------------------------------------------------
+
+layer_outputs = []
+layer_names = []
+
+for layer in model.layers:
+
+    if "conv" in layer.name.lower():
+
+        layer_outputs.append(layer.output)
+
+        layer_names.append(layer.name)
+
+print("Convolution Layers Found :", len(layer_outputs))
+
+# ----------------------------------------------------------
+# Step 7 : Create Activation Model
+# ----------------------------------------------------------
+
+activation_model = tf.keras.models.Model(
+    inputs=model.input,
+    outputs=layer_outputs
+)
+
+# ----------------------------------------------------------
+# Step 8 : Predict Activation Maps
+# ----------------------------------------------------------
+
+activations = activation_model.predict(img_array)
+
+print("Activation Maps Generated")
+
+# ----------------------------------------------------------
+# Step 9 : Display Original Image
+# ----------------------------------------------------------
+
+plt.figure(figsize=(5,5))
+
+plt.imshow(img)
+
+plt.title("Original Image")
+
+plt.axis("off")
+
+plt.show()
+
+# ----------------------------------------------------------
+# Step 10 : Visualize Activation Maps
+# ----------------------------------------------------------
+
+layer_number = 0
+
+feature_maps = activations[layer_number]
+
+plt.figure(figsize=(12,10))
+
+for i in range(16):
+
+    plt.subplot(4,4,i+1)
+
+    plt.imshow(
+        feature_maps[0,:,:,i],
+        cmap="viridis"
+    )
+
+    plt.title(f"Map {i+1}", fontsize=8)
+
+    plt.axis("off")
+
+plt.suptitle(
+    "Activation Maps of First Convolution Layer",
+    fontsize=16
+)
+
+plt.tight_layout()
+
+plt.show()
+
+# ==========================================================
+# PRACTICAL - 25
+# Title: Implement Saliency Maps for Image Explanations
+# ==========================================================
+
+
+# ==========================================================
+# Step 1: Import Required Libraries
+# ==========================================================
+
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+
+from tensorflow.keras.applications import MobileNetV2
+
+from tensorflow.keras.applications.mobilenet_v2 import (
+    preprocess_input,
+    decode_predictions
+)
+
+
+# ==========================================================
+# Step 2: Load Pretrained MobileNetV2 Model
+# ==========================================================
+
+print("Loading MobileNetV2 Model...")
+
+# Load MobileNetV2 trained on ImageNet
+model = MobileNetV2(
+    weights="imagenet"
+)
+
+print("Model Loaded Successfully")
+
+
+# ==========================================================
+# Step 3: Download Reliable Test Image
+# ==========================================================
+
+# TensorFlow official test image
+image_url = (
+    "https://storage.googleapis.com/"
+    "download.tensorflow.org/example_images/"
+    "grace_hopper.jpg"
+)
+
+# Download the image
+image_path = tf.keras.utils.get_file(
+    "grace_hopper.jpg",
+    image_url
+)
+
+print("Image Downloaded Successfully")
+print("Image Path:", image_path)
+
+
+# ==========================================================
+# Step 4: Load Image
+# ==========================================================
+
+# Load image and resize it to MobileNetV2 input size
+img = tf.keras.utils.load_img(
+    image_path,
+    target_size=(224, 224)
+)
+
+# Convert image into NumPy array
+img_array = tf.keras.utils.img_to_array(
+    img
+)
+
+# Add batch dimension
+img_array = np.expand_dims(
+    img_array,
+    axis=0
+)
+
+# Preprocess image for MobileNetV2
+processed_image = preprocess_input(
+    img_array.copy()
+)
+
+print("Image Preprocessed Successfully")
+
+
+# ==========================================================
+# Step 5: Make Prediction
+# ==========================================================
+
+print("\nGenerating Prediction...")
+
+predictions = model.predict(
+    processed_image
+)
+
+# Get top 3 predictions
+decoded_predictions = decode_predictions(
+    predictions,
+    top=3
+)[0]
+
+print("\nTop 3 Predictions:")
+
+for class_id, class_name, probability in decoded_predictions:
+
+    print(
+        class_name,
+        ":",
+        round(probability * 100, 2),
+        "%"
+    )
+
+
+# ==========================================================
+# Step 6: Generate Saliency Map
+# ==========================================================
+
+print("\nGenerating Saliency Map...")
+
+# Convert image into TensorFlow variable
+input_image = tf.Variable(
+    processed_image,
+    dtype=tf.float32
+)
+
+# Track gradients
+with tf.GradientTape() as tape:
+
+    tape.watch(input_image)
+
+    # Make prediction
+    predictions = model(
+        input_image
+    )
+
+    # Find predicted class
+    predicted_class = tf.argmax(
+        predictions[0]
+    )
+
+    # Get prediction score
+    predicted_score = predictions[
+        0,
+        predicted_class
+    ]
+
+
+# Calculate gradients with respect to input image
+gradients = tape.gradient(
+    predicted_score,
+    input_image
+)
+
+
+# Take absolute gradient values
+saliency = tf.abs(
+    gradients
+)
+
+
+# Combine RGB channels
+saliency = tf.reduce_max(
+    saliency,
+    axis=-1
+)
+
+
+# Remove batch dimension
+saliency = saliency[0]
+
+
+# Normalize saliency values
+saliency = (
+    saliency -
+    tf.reduce_min(saliency)
+) / (
+    tf.reduce_max(saliency) -
+    tf.reduce_min(saliency) +
+    1e-8
+)
+
+print("Saliency Map Generated Successfully")
+
+
+# ==========================================================
+# Step 7: Display Results
+# ==========================================================
+
+plt.figure(
+    figsize=(12, 5)
+)
+
+
+# ----------------------------------------------------------
+# Display Original Image
+# ----------------------------------------------------------
+
+plt.subplot(
+    1,
+    2,
+    1
+)
+
+plt.imshow(
+    img
+)
+
+plt.title(
+    "Original Image"
+)
+
+plt.axis(
+    "off"
+)
+
+
+# ----------------------------------------------------------
+# Display Saliency Map
+# ----------------------------------------------------------
+
+plt.subplot(
+    1,
+    2,
+    2
+)
+
+plt.imshow(
+    saliency,
+    cmap="hot"
+)
+
+plt.title(
+    "Saliency Map"
+)
+
+plt.axis(
+    "off"
+)
+
+
+plt.tight_layout()
+
+plt.show()
+
+# ==========================================================
+# Practical 27
+# Title : Generate Model Cards for AI Systems
+# ==========================================================
+
+# ----------------------------------------------------------
+# Import Libraries
+# ----------------------------------------------------------
+
+import pandas as pd
+
+from sklearn.datasets import load_breast_cancer
+
+from sklearn.model_selection import train_test_split
+
+from sklearn.ensemble import RandomForestClassifier
+
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score
+)
+
+# ----------------------------------------------------------
+# Load Dataset
+# ----------------------------------------------------------
+
+data = load_breast_cancer()
+
+X = pd.DataFrame(
+    data.data,
+    columns=data.feature_names
+)
+
+y = data.target
+
+print("Dataset Loaded Successfully")
+
+# ----------------------------------------------------------
+# Split Dataset
+# ----------------------------------------------------------
+
+X_train, X_test, y_train, y_test = train_test_split(
+
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+
+)
+
+# ----------------------------------------------------------
+# Train Model
+# ----------------------------------------------------------
+
+model = RandomForestClassifier(
+
+    n_estimators=100,
+
+    random_state=42
+
+)
+
+model.fit(X_train, y_train)
+
+print("Random Forest Model Trained Successfully")
+
+# ----------------------------------------------------------
+# Prediction
+# ----------------------------------------------------------
+
+y_pred = model.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+
+precision = precision_score(y_test, y_pred)
+
+recall = recall_score(y_test, y_pred)
+
+f1 = f1_score(y_test, y_pred)
+
+# ----------------------------------------------------------
+# Generate Model Card
+# ----------------------------------------------------------
+
+print("\n============== MODEL CARD ==============")
+
+print("\nModel Name : Random Forest Classifier")
+
+print("Version : 1.0")
+
+print("Developer : MSc Data Science Student")
+
+print("Purpose : Breast Cancer Classification")
+
+print("Dataset : Breast Cancer Wisconsin Dataset")
+
+print("Algorithm : Random Forest")
+
+print("Features :", X.shape[1])
+
+print("Training Samples :", len(X_train))
+
+print("Testing Samples :", len(X_test))
+
+print("\nPerformance Metrics")
+
+print("Accuracy :", round(accuracy*100,2), "%")
+
+print("Precision :", round(precision,3))
+
+print("Recall :", round(recall,3))
+
+print("F1 Score :", round(f1,3))
+
+print("\nIntended Users")
+
+print("- Doctors")
+
+print("- Medical Researchers")
+
+print("- Students")
+
+print("\nEthical Considerations")
+
+print("- Human verification is required.")
+
+print("- Protect patient privacy.")
+
+print("- Avoid automated medical decisions.")
+
+print("\nLimitations")
+
+print("- Limited dataset")
+
+print("- Educational implementation")
+
+print("- Needs periodic retraining")
+
+print("\nFairness")
+
+print("- Evaluate demographic fairness before deployment.")
+
+print("\nRecommendations")
+
+print("- Monitor performance regularly.")
+
+print("- Update model with new data.")
+
+print("- Test on diverse populations.")
+
+print("\n============== MODEL CARD GENERATED SUCCESSFULLY ==============")
+
